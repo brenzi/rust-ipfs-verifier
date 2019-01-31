@@ -1,0 +1,94 @@
+extern crate multihash;
+extern crate cid;
+extern crate futures;
+extern crate hyper;
+extern crate ipfs_api;
+extern crate rust_base58;
+extern crate sha2;
+
+use sha2::{Sha256, Digest};
+use rust_base58::{ToBase58, FromBase58};
+use multihash::{encode, decode, Hash, Multihash, to_hex};
+use cid::{Cid, Codec, Version, Prefix};
+use futures::Future;
+use ipfs_api::IpfsClient;
+use std::io::{self, Write, Cursor};
+use std::str;
+
+
+fn main() {
+    
+    println!("connecting to localhost:5001...");
+    let client = IpfsClient::default();
+
+    let req = client
+        .version()
+        .map(|version| println!("version: {:?}", version.version));
+
+    hyper::rt::run(req.map_err(|e| eprintln!("{}", e)));
+
+    // write data to ipfs
+    let data = b"awesome test content\n";
+    //let msg = b"Hello World!";
+    let datac = Cursor::new(data);
+    println!("{:?}",data);
+    
+
+    let req = client
+        .add(datac)
+        .map(|res| {
+            println!("{}", res.hash);
+            //let addrmh = decode(res.hash.as_bytes()).unwrap();  
+            //let hash = addrmh.digest;   
+            //println!("digest: {}", str::from_utf8(hash).unwrap())
+            //println!("digest: {:?}", to_hex(hash))
+        })
+        .map_err(|e| eprintln!("{}", e));
+
+    hyper::rt::run(req);
+    
+
+    /*
+    let req = client
+        .get("QmNYERzV2LfD2kkfahtfv44ocHzEFK1sLBaE7zdcYT2GAZ")
+        .concat2()
+        .map(|res| {
+            let out = io::stdout();
+            let mut out = out.lock();
+
+            out.write_all(&res).unwrap();
+        })
+        .map_err(|e| eprintln!("{}", e));
+
+    hyper::rt::run(req);
+    */
+
+
+
+    // test cid
+    
+    let h = multihash::encode(multihash::Hash::SHA2256, data).unwrap();
+
+    let cid = Cid::new(Codec::Raw, Version::V1, &h);
+    let prefix = cid.prefix();
+
+    let cid2 = Cid::new_from_prefix(&prefix, data);
+
+    /* 
+    address created like this with ipfs client (echo adds a "\n"!)
+        > echo awesome test content > test.txt
+        > ipfs add --raw-leaves test.txt
+        zb2rhgCbaGmTcdZVRpZi3Z8CsdtAbFv7PRdRD9s6mKtef6LK9
+    */
+
+    let cid3 = Cid::from("zb2rhgCbaGmTcdZVRpZi3Z8CsdtAbFv7PRdRD9s6mKtef6LK9").unwrap();
+
+    let prefix_bytes = prefix.as_bytes();
+    let prefix2 = Prefix::new_from_bytes(&prefix_bytes).unwrap();
+
+    
+    println!("cid1: {} codec:  prefix: {:x?}",cid.to_string(), prefix.as_bytes());
+    println!("cid2: {} codec:  prefix: {:x?}",cid2.to_string(), prefix2.as_bytes());
+    println!("cid3: {} codec:  prefix: {:x?}",cid3.to_string(), cid3.prefix().as_bytes());
+    
+ }
