@@ -1,30 +1,20 @@
-// Copyright (C) 2017-2018 Baidu, Inc. All Rights Reserved.
+//  Copyright (c) 2019 Alain Brenzikofer
 //
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions
-// are met:
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
 //
-//  * Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-//  * Redistributions in binary form must reproduce the above copyright
-//    notice, this list of conditions and the following disclaimer in
-//    the documentation and/or other materials provided with the
-//    distribution.
-//  * Neither the name of Baidu, Inc., nor the names of its
-//    contributors may be used to endorse or promote products derived
-//    from this software without specific prior written permission.
+//       http://www.apache.org/licenses/LICENSE-2.0
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+
+extern crate futures;
+extern crate hyper;
+extern crate ipfs_api;
 
 extern crate sgx_types;
 extern crate sgx_urts;
@@ -32,16 +22,20 @@ extern crate dirs;
 use sgx_types::*;
 use sgx_urts::SgxEnclave;
 
-use std::io::{Read, Write};
+use std::io::{Read, Write, Cursor};
 use std::fs;
 use std::path;
+
+use futures::Future;
+use ipfs_api::IpfsClient;
 
 static ENCLAVE_FILE: &'static str = "enclave.signed.so";
 static ENCLAVE_TOKEN: &'static str = "enclave.token";
 
 extern {
     fn say_something(eid: sgx_enclave_id_t, retval: *mut sgx_status_t,
-                     some_string: *const u8, len: usize) -> sgx_status_t;
+                     data_string: *const u8, data_len: usize,
+                     cid_string: *const u8, cid_len: usize) -> sgx_status_t;
 }
 
 fn init_enclave() -> SgxResult<SgxEnclave> {
@@ -125,15 +119,65 @@ fn main() {
         },
     };
 
-    let input_string = String::from("This is a normal world string passed into Enclave!\n");
+    // 
+    println!("connecting to localhost:5001...");
+    let client = IpfsClient::default();
+    // write data to ipfs
+    let data = b"awesome test content\n";
+    let datac = Cursor::new(data);
+    let req = client
+        .add(datac)
+        .map(|res| {
+            println!("{}", res.hash);
+            //let addrmh = decode(res.hash.as_bytes()).unwrap();  
+            //let hash = addrmh.digest;   
+            //println!("digest: {}", str::from_utf8(hash).unwrap())
+            //println!("digest: {:?}", to_hex(hash))
+        })
+        .map_err(|e| eprintln!("{}", e));
+
+    hyper::rt::run(req);
+    // FIXME: if ipfs-api would support --raw-leaves, the address would be
+
+/*
+    // first compute the thing in untrusted app (easier debugging)
+
+    // hardcoded multihash
+    let size: u8 = 32;      //256bit=32bytes
+    let code: u8 = 0x12;    // SHA2256
+    //let code = 0x41;    // Blake2s
+    let mut output = Vec::new();
+    //output.resize(2 + size as usize, 0);
+    output.push(code);
+    output.push(size);
+    let hash = rsgx_sha256_slice(data_slice).unwrap();
+    // FIXME: concatenate must be easier than this!
+    for h in hash.iter() {
+        output.push(*h);
+    }
+
+
+    //let h = multihash::encode(multihash::Hash::SHA2256, data_slice).unwrap();
+    //let cid = Cid::new(Codec::Raw, Version::V1, &h);
+
+    println!("SGX: input cid: {:?} ", cid_slice);
+    println!("SGX: true  cid: {:?} ", output);
+
+*/
+
+
+    //let data_string = String::from_(data);
+    let cid_string = String::from("zb2rhgCbaGmTcdZVRpZi3Z8CsdtAbFv7PRdRD9s6mKtef6LK9\n");
 
     let mut retval = sgx_status_t::SGX_SUCCESS;
 
     let result = unsafe {
         say_something(enclave.geteid(),
                       &mut retval,
-                      input_string.as_ptr() as * const u8,
-                      input_string.len())
+                      data.as_ptr() as * const u8,
+                      data.len(),
+                      cid_string.as_ptr() as * const u8,
+                      cid_string.len())
     };
 
     match result {

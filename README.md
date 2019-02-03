@@ -16,3 +16,6 @@ These addresses are reproduced based on the string `awesome test content\n`
 1. retrieve content from ipfs
 2. compute multihash from content
 3. verify matching multihashes (retrieved address and computed multihash)
+
+# trusted verifier (Intel SGX)
+See [/sgx/README.md](./sgx/README.md)

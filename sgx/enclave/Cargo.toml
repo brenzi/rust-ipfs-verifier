@@ -1,10 +1,10 @@
 [package]
-name = "Helloworldsampleenclave"
+name = "IpfsVerifierEnclave"
 version = "1.0.0"
-authors = ["Baidu"]
+authors = ["Alain Brenzikofer"]
 
 [lib]
-name = "helloworldsampleenclave"
+name = "IpfsVerifierEnclave"
 crate-type = ["staticlib"]
 
 [features]
@@ -13,3 +13,8 @@ default = []
 [target.'cfg(not(target_env = "sgx"))'.dependencies]
 sgx_types = "1.0.5"
 sgx_tstd = "1.0.5"
+sgx_tcrypto = "1.0.5"
+multihash = { git = "https://github.com/multiformats/rust-multihash.git"}
+rust-base58 = "0.0.4"
+sha2 = { version = "0.7", default-features = false }
+cid = { git ="https://github.com/multiformats/rust-cid.git"}
