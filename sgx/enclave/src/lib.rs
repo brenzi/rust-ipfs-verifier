@@ -31,16 +31,17 @@ extern crate rust_base58;
 //extern crate sha2;
 
 use sgx_types::*;
-use std::string::String;
-use std::vec::Vec;
-use std::io::{self, Write};
+use std::prelude::v1::*;
+//use std::string::String;
+//use std::vec::Vec;
+//use std::io::{self, Write};
 use std::slice;
 
 use sgx_tcrypto::*;
 
-use rust_base58::{ToBase58, FromBase58};
+//use rust_base58::{ToBase58, FromBase58};
 // use sha2::{Sha256, Digest};
-// use rust_base58::{ToBase58, FromBase58};
+use rust_base58::{ToBase58, FromBase58};
 // use multihash::{encode, decode, Hash, Multihash, to_hex};
 // use cid::{Cid, Codec, Version, Prefix};
 
@@ -83,8 +84,8 @@ pub extern "C" fn cid_verify(data_string: *const u8, data_len: usize, cid_string
     for h in hash.iter() {
         output.push(*h);
     }
-    let cid = ToBase58(output);
-
+    let cid = ToBase58::to_base58(&output[..]);
+    let cid = output;
     //let h = multihash::encode(multihash::Hash::SHA2256, data_slice).unwrap();
     //let cid = Cid::new(Codec::Raw, Version::V1, &h);
 

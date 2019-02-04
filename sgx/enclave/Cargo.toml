@@ -14,4 +14,4 @@ default = []
 sgx_types = "1.0.5"
 sgx_tstd = "1.0.5"
 sgx_tcrypto = "1.0.5"
-rust-base58 = { path =  "../../../rust-base58" }     
+rust-base58 = { path =  "../../../rust-sgx-sdk/third_party/rust-base58" }     
