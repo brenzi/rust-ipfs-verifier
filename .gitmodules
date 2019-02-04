@@ -1,0 +1,3 @@
+[submodule "sgx/rust-sgx-sdk"]
+	path = sgx/rust-sgx-sdk
+	url = https://github.com/brenzi/rust-sgx-sdk.git

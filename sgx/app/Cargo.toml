@@ -5,8 +5,8 @@ authors = ["Alain Brenzikofer"]
 build = "build.rs"
 
 [dependencies]
-sgx_types = "1.0.5"
-sgx_urts = "1.0.5"
+sgx_types = { path =  "../rust-sgx-sdk/sgx_types" }
+sgx_urts = { path =  "../rust-sgx-sdk/sgx_urts" }
 dirs = "1.0.2"
 ipfs-api = "0.5.0-alpha2"
 futures = "0.1"
