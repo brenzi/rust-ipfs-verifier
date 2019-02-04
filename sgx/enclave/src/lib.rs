@@ -27,7 +27,7 @@ extern crate sgx_tcrypto;
 
 //extern crate multihash;
 //extern crate cid;
-//extern crate rust_base58;
+extern crate rust_base58;
 //extern crate sha2;
 
 use sgx_types::*;
@@ -38,13 +38,14 @@ use std::slice;
 
 use sgx_tcrypto::*;
 
+use rust_base58::{ToBase58, FromBase58};
 // use sha2::{Sha256, Digest};
 // use rust_base58::{ToBase58, FromBase58};
 // use multihash::{encode, decode, Hash, Multihash, to_hex};
 // use cid::{Cid, Codec, Version, Prefix};
 
 #[no_mangle]
-pub extern "C" fn say_something(data_string: *const u8, data_len: usize, cid_string: *const u8, cid_len: usize) -> sgx_status_t {
+pub extern "C" fn cid_verify(data_string: *const u8, data_len: usize, cid_string: *const u8, cid_len: usize) -> sgx_status_t {
 
     let data_slice = unsafe { slice::from_raw_parts(data_string, data_len) };
     let cid_slice = unsafe { slice::from_raw_parts(cid_string, cid_len) };
@@ -82,13 +83,13 @@ pub extern "C" fn say_something(data_string: *const u8, data_len: usize, cid_str
     for h in hash.iter() {
         output.push(*h);
     }
-
+    let cid = ToBase58(output);
 
     //let h = multihash::encode(multihash::Hash::SHA2256, data_slice).unwrap();
     //let cid = Cid::new(Codec::Raw, Version::V1, &h);
 
     println!("SGX: input cid: {:?} ", cid_slice);
-    println!("SGX: true  cid: {:?} ", output);
+    println!("SGX: true  cid: {:?} ", cid);
     // Ocall to normal world for output
     // println!("{}", &hello_string);
 

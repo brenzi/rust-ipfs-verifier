@@ -14,7 +14,4 @@ default = []
 sgx_types = "1.0.5"
 sgx_tstd = "1.0.5"
 sgx_tcrypto = "1.0.5"
-multihash = { git = "https://github.com/multiformats/rust-multihash.git"}
-rust-base58 = "0.0.4"
-sha2 = { version = "0.7", default-features = false }
-cid = { git ="https://github.com/multiformats/rust-cid.git"}
+rust-base58 = { path =  "../../../rust-base58" }     

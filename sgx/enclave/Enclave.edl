@@ -37,6 +37,6 @@ enclave {
     trusted {
         /* define ECALLs here. */
 
-        public sgx_status_t say_something([in, size=len] const uint8_t* some_string, size_t len);
+        public sgx_status_t cid_verify([in, size=data_len] const uint8_t* data_string, size_t data_len, [in, size=cid_len] const uint8_t* cid_string, size_t cid_len);
     };
 };

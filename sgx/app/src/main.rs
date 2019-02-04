@@ -33,7 +33,7 @@ static ENCLAVE_FILE: &'static str = "enclave.signed.so";
 static ENCLAVE_TOKEN: &'static str = "enclave.token";
 
 extern {
-    fn say_something(eid: sgx_enclave_id_t, retval: *mut sgx_status_t,
+    fn cid_verify(eid: sgx_enclave_id_t, retval: *mut sgx_status_t,
                      data_string: *const u8, data_len: usize,
                      cid_string: *const u8, cid_len: usize) -> sgx_status_t;
 }
@@ -172,7 +172,7 @@ fn main() {
     let mut retval = sgx_status_t::SGX_SUCCESS;
 
     let result = unsafe {
-        say_something(enclave.geteid(),
+        cid_verify(enclave.geteid(),
                       &mut retval,
                       data.as_ptr() as * const u8,
                       data.len(),
@@ -188,7 +188,7 @@ fn main() {
         }
     }
 
-    println!("[+] say_something success...");
+    println!("[+] cid_verify success...");
 
     enclave.destroy();
 }

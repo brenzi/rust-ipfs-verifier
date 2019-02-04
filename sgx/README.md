@@ -21,6 +21,8 @@ based on [rust-sgx-sdk](https://github.com/baidu/rust-sgx-sdk)
 > sudo dpkg -i ./libsgx-enclave-common_2.4.100.48163-xenial1_amd64.deb
 > sudo ./sgx_linux_x64_sdk_2.4.100.48163.bin
 ```
+install the sdk to /opt/intel
+
 now check installation
 ```
 > lsmod | grep sgx
@@ -28,10 +30,26 @@ isgx                   49152  1
 > sudo service aesmd start
 ```
 
+### running in SW simulation mode
+If you don't have an SGX enabled machine, you can still run in simulation mode:
+
+```
+> wget https://download.01.org/intel-sgx/linux-2.4/ubuntu16.04-server/sgx_linux_x64_sdk_2.4.100.48163.bin
+```
+install the sdk to /opt/intel
+
+
 ##
 to run in HW mode: 
 ```
 > make
+> cd bin
+> ./app
+```
+
+to run in SW mode
+```
+> SGX_MODE=SW make
 > cd bin
 > ./app
 ```
