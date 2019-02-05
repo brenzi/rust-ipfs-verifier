@@ -35,6 +35,8 @@ If you don't have an SGX enabled machine, you can still run in simulation mode:
 
 ```
 > wget https://download.01.org/intel-sgx/linux-2.4/ubuntu16.04-server/sgx_linux_x64_sdk_2.4.100.48163.bin
+> wget https://download.01.org/intel-sgx/linux-2.4/ubuntu16.04-server/libsgx-enclave-common_2.4.100.48163-xenial1_amd64.deb
+> sudo dpkg -i ./libsgx-enclave-common_2.4.100.48163-xenial1_amd64.deb
 ```
 install the sdk to /opt/intel
 
@@ -47,9 +49,11 @@ to run in HW mode:
 > ./app
 ```
 
-to run in SW mode
+to run in SW mode (tested on WSL)
 ```
-> SGX_MODE=SW make
+> export SGX_MODE=SW
+> export LD_LIBRARY_PATH=/opt/intel/sgxsdk/lib64/
+> make
 > cd bin
 > ./app
 ```
